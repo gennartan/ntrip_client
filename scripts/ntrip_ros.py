@@ -9,6 +9,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Header
 from nmea_msgs.msg import Sentence
+from rcl_interfaces.msg import SetParametersResult
 
 from ntrip_client.ntrip_client import NTRIPClient
 from ntrip_client.nmea_parser import NMEA_DEFAULT_MAX_LENGTH, NMEA_DEFAULT_MIN_LENGTH
@@ -58,6 +59,8 @@ class NTRIPRos(Node):
                 ('rtcm_timeout_seconds', NTRIPClient.DEFAULT_RTCM_TIMEOUT_SECONDS),
             ]
         )
+
+        self.add_post_set_parameters_callback(self.post_set_parameters_callback)
 
         # Set the log level to debug if debug is true
         if self._debug:
@@ -159,6 +162,16 @@ class NTRIPRos(Node):
             loginfo=self.get_logger().info,
             logdebug=self.get_logger().debug
         )
+
+    def post_set_parameters_callback(self, _params):
+        self.get_logger().info('Shutdown NTRIP client')
+        self._client.shutdown()
+
+        self.get_logger().info('Re-initialize NTRIP client')
+        self.init_client()
+
+        if not self._client.connect():
+            self.get_logger().error('Unable to connect to NTRIP server')
 
     def run(self):
         # Connect the client

@@ -38,6 +38,15 @@ class NTRIPClient:
         ntrip_version,
         username,
         password,
+        reconnect_attempt_max,
+        reconnect_attempt_wait_seconds,
+        rtcm_timeout_seconds,
+        nmea_min_length,
+        nmea_max_length,
+        use_ssl=False,
+        cert=None,
+        key=None,
+        ca_cert=None,
         logerr=logging.error,
         logwarn=logging.warning,
         loginfo=logging.info,
@@ -71,6 +80,8 @@ class NTRIPClient:
             logdebug=logdebug
         )
         self.nmea_parser = NMEAParser(
+            nmea_min_length=nmea_min_length,
+            nmea_max_length=nmea_max_length,
             logerr=logerr,
             logwarn=logwarn,
             loginfo=loginfo,
@@ -78,11 +89,11 @@ class NTRIPClient:
         )
 
         # Public SSL configuration
-        self.ssl = False
+        self.ssl = use_ssl
         self._ssl_context = None
-        self.cert = None
-        self.key = None
-        self.ca_cert = None
+        self.cert = cert
+        self.key = key
+        self.ca_cert = ca_cert
 
         # Setup some state
         self._shutdown = False
@@ -98,9 +109,9 @@ class NTRIPClient:
         self._recv_rtcm_last_packet_timestamp = 0
 
         # Public reconnect info
-        self.reconnect_attempt_max = self.DEFAULT_RECONNECT_ATTEMPT_MAX
-        self.reconnect_attempt_wait_seconds = self.DEFAULT_RECONNECT_ATEMPT_WAIT_SECONDS
-        self.rtcm_timeout_seconds = self.DEFAULT_RTCM_TIMEOUT_SECONDS
+        self.reconnect_attempt_max = reconnect_attempt_max
+        self.reconnect_attempt_wait_seconds = reconnect_attempt_wait_seconds
+        self.rtcm_timeout_seconds = rtcm_timeout_seconds
 
     def connect(self):
         # Create a socket object that we will use to connect to the server

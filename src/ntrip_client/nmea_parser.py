@@ -6,7 +6,15 @@ _NMEA_CHECKSUM_SEPERATOR = "*"
 
 class NMEAParser:
 
-    def __init__(self, logerr=logging.error, logwarn=logging.warning, loginfo=logging.info, logdebug=logging.debug):
+    def __init__(
+        self,
+        nmea_max_length=NMEA_DEFAULT_MAX_LENGTH,
+        nmea_min_length=NMEA_DEFAULT_MIN_LENGTH,
+        logerr=logging.error,
+        logwarn=logging.warning,
+        loginfo=logging.info,
+        logdebug=logging.debug
+    ):
         # Bit of a strange pattern here, but save the log functions so we can be agnostic of ROS
         self._logerr = logerr
         self._logwarn = logwarn
@@ -14,8 +22,8 @@ class NMEAParser:
         self._logdebug = logdebug
 
         # Save some other config
-        self.nmea_max_length = NMEA_DEFAULT_MAX_LENGTH
-        self.nmea_min_length = NMEA_DEFAULT_MIN_LENGTH
+        self.nmea_max_length = nmea_max_length
+        self.nmea_min_length = nmea_min_length
 
     def is_valid_sentence(self, sentence):
         # Simple sanity checks
